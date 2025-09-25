@@ -1,0 +1,48 @@
+type User @model @auth(rules: [{ allow: owner }, { allow: groups, groups: ["Admins"] }]) {
+  id: ID!
+  username: String!
+  email: String!
+  groups: [Group] @connection(keyName: "byUser", fields: ["id"])
+  picks: [Pick] @connection(keyName: "byUser", fields: ["id"])
+  seasonRecords: [SeasonRecord] @connection(keyName: "byUser", fields: ["id"])
+}
+
+type Group @model @auth(rules: [{ allow: groups, groups: ["Admins"] }]) {
+  id: ID!
+  name: String!
+  users: [User] @connection(keyName: "byGroup", fields: ["id"])
+  games: [Game] @connection(keyName: "byGroup", fields: ["id"])
+}
+
+type Game @model @auth(rules: [{ allow: groups, groups: ["Admins"] }]) {
+  id: ID!
+  week: Int!
+  date: AWSDateTime!
+  homeTeam: String!
+  awayTeam: String!
+  spread: Float!
+  group: Group @connection(fields: ["groupId"])
+  groupId: ID!
+  picks: [Pick] @connection(keyName: "byGame", fields: ["id"])
+}
+
+type Pick @model @auth(rules: [{ allow: owner }, { allow: groups, groups: ["Admins"] }]) {
+  id: ID!
+  user: User @connection(fields: ["userId"])
+  userId: ID!
+  game: Game @connection(fields: ["gameId"])
+  gameId: ID!
+  selectedTeam: String!
+  isCorrect: Boolean
+}
+
+type SeasonRecord @model @auth(rules: [{ allow: owner }, { allow: groups, groups: ["Admins"] }]) {
+  id: ID!
+  user: User @connection(fields: ["userId"])
+  userId: ID!
+  group: Group @connection(fields: ["groupId"])
+  groupId: ID!
+  wins: Int!
+  losses: Int!
+  pushes: Int!
+}
